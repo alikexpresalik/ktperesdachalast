@@ -3,7 +3,6 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
 import { FBXLoader } from 'three/addons/loaders/FBXLoader.js';
 
-// --- ИСХОДНЫЕ ССЫЛКИ НА ТВОЙ ПЕРВЫЙ РЕПОЗИТОРИЙ ---
 const MODEL_SOURCES = {
     cnek: 'https://github.com/alikexpresalik/k2peresdatcha/blob/main/cnek.obj',
     mug: 'https://github.com/alikexpresalik/k2peresdatcha/blob/main/teamugobj.obj',
@@ -15,7 +14,6 @@ const MODEL_SOURCES = {
     koltuk: 'https://github.com/alikexpresalik/k2peresdatcha/blob/main/Koltuk.obj'
 };
 
-// Функция-резолвер: превращает HTML-просмотрщик GitHub в прямой файл с заголовками CORS
 function resolveGithubUrl(url) {
     if (!url) return '';
     return url
@@ -23,7 +21,6 @@ function resolveGithubUrl(url) {
         .replace('/blob/', '/');
 }
 
-// --- СЦЕНА, РЕНДЕР И КАМЕРА ---
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x0a0c10);
 scene.fog = new THREE.FogExp2(0x0a0c10, 0.02);
@@ -43,15 +40,13 @@ document.body.appendChild(renderer.domElement);
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 controls.dampingFactor = 0.05;
-controls.maxPolarAngle = Math.PI / 2 + 0.02; // Пол не пробиваем
+controls.maxPolarAngle = Math.PI / 2 + 0.02;
 controls.minDistance = 2;
 controls.maxDistance = 25;
 
-// Если юзер крутит мышкой камеру, отменяем программную анимацию
 let isTransitioning = false;
 controls.addEventListener('start', () => { isTransitioning = false; });
 
-// --- СВЕТ ---
 const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
 scene.add(ambientLight);
 
@@ -66,7 +61,6 @@ const rimLight = new THREE.DirectionalLight(0x6366f1, 1.2);
 rimLight.position.set(-10, 6, -10);
 scene.add(rimLight);
 
-// Пол и технологичная сетка
 const grid = new THREE.GridHelper(30, 30, 0x38bdf8, 0x1e293b);
 grid.position.y = -0.01;
 scene.add(grid);
@@ -78,7 +72,6 @@ floor.rotation.x = -Math.PI / 2;
 floor.receiveShadow = true;
 scene.add(floor);
 
-// --- СОСТОЯНИЕ И РЕЕСТР МОДЕЛЕЙ ---
 const models = {};
 const interactiveMeshes = [];
 let autoRotate = true;
@@ -90,7 +83,6 @@ const camTarget = {
     look: new THREE.Vector3(0, 1.5, 0)
 };
 
-// Функция очистки кривых моделей от мусорных софтбоксов и фонов
 function cleanModel(model, fallbackColor, isPlant = false) {
     const toRemove = [];
 
@@ -134,7 +126,6 @@ function cleanModel(model, fallbackColor, isPlant = false) {
     toRemove.forEach((m) => { if (m.parent) m.parent.remove(m); });
 }
 
-// Нормализация масштаба и центрирование
 function normalizeModel(model, targetSize, posX, posZ) {
     const box = new THREE.Box3().setFromObject(model);
     const size = box.getSize(new THREE.Vector3());
@@ -164,12 +155,10 @@ function registerModel(id, obj, title, desc) {
     setStatus(`Загружено из внешнего репозитория: ${title}`);
 }
 
-// --- ЗАГРУЗКА 5 МОДЕЛЕЙ ЧЕРЕЗ URL ---
 const objLoader = new OBJLoader();
 const fbxLoader = new FBXLoader();
 const textureLoader = new THREE.TextureLoader();
 
-// 1. CNEK (Центр)
 objLoader.load(resolveGithubUrl(MODEL_SOURCES.cnek), (obj) => {
     let maxVerts = 0;
     const toRemove = [];
@@ -198,21 +187,18 @@ objLoader.load(resolveGithubUrl(MODEL_SOURCES.cnek), (obj) => {
     registerModel('cnek', obj, 'Скульптура Cnek', 'Фильтрация софтбоксов и студийных паразитов прошла успешно.');
 });
 
-// 2. КРУЖКА (Справа)
 objLoader.load(resolveGithubUrl(MODEL_SOURCES.mug), (obj) => {
     cleanModel(obj, 0x06b6d4);
     normalizeModel(obj, 1.2, 2.6, 1.6);
     registerModel('mug', obj, 'Керамическая кружка', 'OBJ импорт из репозитория k2peresdatcha.');
 });
 
-// 3. ЧАСЫ (Дальний правый угол)
 fbxLoader.load(resolveGithubUrl(MODEL_SOURCES.watch), (fbx) => {
     cleanModel(fbx, 0xf59e0b);
     normalizeModel(fbx, 1.3, 4.8, -0.6);
     registerModel('watch', fbx, 'Наручные часы (FBX)', 'Бинарный FBX импорт с внешнего источника.');
 });
 
-// 4. КОМНАТНОЕ РАСТЕНИЕ С PBR-ТЕКСТУРАМИ (Дальний левый угол)
 const plantColorMap = textureLoader.load(resolveGithubUrl(MODEL_SOURCES.plantCol));
 plantColorMap.colorSpace = THREE.SRGBColorSpace;
 const plantNormalMap = textureLoader.load(resolveGithubUrl(MODEL_SOURCES.plantNor));
@@ -237,14 +223,12 @@ objLoader.load(resolveGithubUrl(MODEL_SOURCES.plantObj), (obj) => {
     registerModel('plant', obj, 'Комнатное растение', 'Текстурированный PBR-меш с NormalMap и Albedo.');
 });
 
-// 5. КРЕСЛО KOLTUK (Слева)
 objLoader.load(resolveGithubUrl(MODEL_SOURCES.koltuk), (obj) => {
     cleanModel(obj, 0xef4444);
     normalizeModel(obj, 2.0, -2.6, 1.6);
     registerModel('koltuk', obj, 'Кресло Koltuk', 'OBJ модель мебели, отмасштабирована в размер сцены.');
 });
 
-// --- RAYCASTER (КЛИКИ И ХОВЕРЫ) ---
 const raycaster = new THREE.Raycaster();
 const mouse = new THREE.Vector2();
 let hoveredMesh = null;
@@ -289,7 +273,6 @@ window.addEventListener('click', () => {
     }
 });
 
-// --- УПРАВЛЕНИЕ КАМЕРОЙ И UI ---
 export function focusOnModel(id) {
     if (!id || id === 'all') {
         selectedModelId = null;
@@ -379,7 +362,6 @@ window.addEventListener('resize', () => {
     renderer.setSize(window.innerWidth, window.innerHeight);
 });
 
-// --- ГЛАВНЫЙ ЦИКЛ ---
 function animate() {
     requestAnimationFrame(animate);
 
