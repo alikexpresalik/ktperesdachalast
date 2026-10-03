@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Showroom - Multirepo Three.js</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+        }
+        body {
+            overflow: hidden;
+            background-color: #0a0c10;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            color: #f8fafc;
+        }
+        canvas {
+            display: block;
+            width: 100vw;
+            height: 100vh;
+        }
+        .hud-panel {
+            position: absolute;
+            top: 16px;
+            left: 16px;
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-width: 320px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            z-index: 10;
+        }
+        .hud-panel h2 {
+            font-size: 13px;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: #38bdf8;
+            margin-bottom: 2px;
+        }
+        .btn-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+        button {
+            background: #1e293b;
+            color: #f1f5f9;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            padding: 6px 10px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        button:hover {
+            background: #2563eb;
+            color: #ffffff;
+            border-color: #60a5fa;
+        }
+        .color-picker-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            color: #94a3b8;
+        }
+        input[type="color"] {
+            border: none;
+            width: 28px;
+            height: 28px;
+            border-radius: 4px;
+            cursor: pointer;
+            background: transparent;
+        }
+        .info-card {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            border-radius: 12px;
+            padding: 18px;
+            max-width: 340px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            z-index: 10;
+        }
+        .info-card h3 {
+            font-size: 16px;
+            color: #38bdf8;
+            margin-bottom: 6px;
+        }
+        .info-card p {
+            font-size: 13px;
+            line-height: 1.4;
+            color: #cbd5e1;
+        }
+        .status-bar {
+            position: absolute;
+            bottom: 12px;
+            left: 16px;
+            font-size: 11px;
+            color: #64748b;
+            font-family: monospace;
+            z-index: 10;
+        }
+    </style>
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+          "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+        }
+      }
+    </script>
+</head>
+<body>
+    <div class="hud-panel">
+        <h2>Модели (Внешний GitHub)</h2>
+        <div class="btn-group">
+            <button onclick="selectModel('all')">Все</button>
+            <button onclick="selectModel('cnek')">Cnek</button>
+            <button onclick="selectModel('koltuk')">Кресло</button>
+            <button onclick="selectModel('plant')">Растение</button>
+            <button onclick="selectModel('mug')">Кружка</button>
+            <button onclick="selectModel('watch')">Часы</button>
+        </div>
+
+        <h2>Интерактив</h2>
+        <div class="btn-group">
+            <button id="rot-btn" onclick="toggleRotation()">Автовращение: ВКЛ</button>
+            <button onclick="toggleWireframe()">Сетка</button>
+        </div>
+
+        <h2>Окружение</h2>
+        <div class="btn-group">
+            <button onclick="setLightingPreset('studio')">Студия</button>
+            <button onclick="setLightingPreset('cyber')">Киберпанк</button>
+            <button onclick="setLightingPreset('minimal')">Минимал</button>
+        </div>
+
+        <div class="color-picker-row">
+            <span>Цвет объекта:</span>
+            <input type="color" value="#3b82f6" onchange="changeColor(this.value)">
+        </div>
+    </div>
+
+    <div class="info-card" id="info-card">
+        <h3>Интерактивный зал</h3>
+        <p>Кликай прямо по моделям в сцене или переключай их кнопками меню слева.</p>
+    </div>
+
+    <div class="status-bar" id="status-hud">Инициализация загрузчиков...</div>
+
+    <script type="module" src="./main.js"></script>
+</body>
+</html>
